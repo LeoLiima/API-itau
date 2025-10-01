@@ -1,65 +1,37 @@
 package unicamp.itau.service;
-import unicamp.itau.model.Stack;
 import unicamp.itau.model.Transacao;
-import unicamp.itau.model.EstatisticaResponse;
 import java.time.OffsetDateTime;
-import java.time.Duration;
+import java.util.DoubleSummaryStatistics;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class TransacaoService {
 
-    Stack stack = new Stack(100);
+      private ConcurrentLinkedQueue<Transacao> transacoes = new ConcurrentLinkedQueue<>();
 
-    //Criar o objeto com os itens passado como parâmetro
 
-    public void PostTransacao(double valor){
-        Transacao trans = new Transacao(valor);
-        stack.empilhar(trans);
+    public void PostTransacao(Transacao trans){
+        transacoes.add(trans);
     }
 
     //metodo delete
     public void delete(){
-        stack.delete();
+       transacoes.clear();
     }
 
 
-    public EstatisticaResponse estatistica() {
-        OffsetDateTime agora = OffsetDateTime.now();
-        int contador = 0;
-        double valorTotal = 0;
-        double min = Double.MAX_VALUE;
-        double max = Double.MIN_VALUE;
+   public DoubleSummaryStatistics getStatistics() {
+        OffsetDateTime now = OffsetDateTime.now();
+        OffsetDateTime limite = now.minusSeconds(60);
 
-        Transacao[] auxiliar = new Transacao[100]; // tamanho da pilha
-        int index = 0;
-        Transacao trans;
+        DoubleSummaryStatistics stats = new DoubleSummaryStatistics();
 
-        while ((trans = this.stack.desempilhar()) != null
-                && Duration.between(trans.getDataHora(), agora).getSeconds() < 60) {
-
-            contador++;
-            valorTotal += trans.getValor();
-
-            if (trans.getValor() > max) {
-                max = trans.getValor();
+        for (Transacao trans : transacoes) {
+            if (trans.getDataHora().isAfter(limite)) {
+                stats.accept(trans.getValor());
             }
-            if (trans.getValor() < min) {
-                min = trans.getValor();
-            }
-
-            auxiliar[index++] = trans;
         }
 
-        for (int i = index - 1; i >= 0; i--) {
-            this.stack.empilhar(auxiliar[i]);
-        }
-
-        double avg = (contador > 0) ? valorTotal / contador : 0;
-
-        if (contador == 0) {
-            min = 0;
-            max = 0;
-        }
-
-        return new EstatisticaResponse(contador, valorTotal, avg, min, max);
+        return stats;
     }
+
 }

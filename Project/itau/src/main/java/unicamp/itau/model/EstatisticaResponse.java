@@ -1,31 +1,26 @@
 package unicamp.itau.model;
 
-import lombok.Data;
-import lombok.AllArgsConstructor;
+import java.util.DoubleSummaryStatistics;
 
 import lombok.Getter;
-
-
-
 
 @Getter
 //DTO
 public class EstatisticaResponse {
-    private int count;
-    private double sum;
-    private double avg;
-    private double min;
-    private double max;
+    private final long count;
+    private final double sum;
+    private final double avg;
+    private final double min;
+    private final double max;
 
 
-    public EstatisticaResponse(int count, double sum, double avg, double min, double max){
-        this.count = count;
-        this.sum = sum;
-        this.avg = avg;
-        this.min = min;
-        this.max = max;
-
-    }
+   public EstatisticaResponse(DoubleSummaryStatistics estatistica){
+        this.count = estatistica.getCount();
+        this.sum = estatistica.getSum();
+        this.avg = estatistica.getAverage();
+        this.min = estatistica.getMin();
+        this.max = estatistica.getMax();
+   }
 
 }
 

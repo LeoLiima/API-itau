@@ -4,11 +4,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+
 import unicamp.itau.model.EstatisticaResponse;
 import unicamp.itau.model.Transacao;
 import unicamp.itau.service.TransacaoService;
+
 import java.time.OffsetDateTime;
+import java.util.DoubleSummaryStatistics;
+
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 
@@ -21,29 +26,28 @@ public class TransacaoController {
     }
 
     @GetMapping("/estatistica")
-    public ResponseEntity<EstatisticaResponse> getEstatistica(){
-        EstatisticaResponse stats = service.estatistica();
+    public ResponseEntity<EstatisticaResponse> getEstatistica(DoubleSummaryStatistics estatisticas){
+        EstatisticaResponse stats = new EstatisticaResponse(estatisticas);
         return ResponseEntity.ok(stats);
     }
 
     @PostMapping("/transacao")
-    public ResponseEntity<Void> adicionarTransacao(@RequestBody valor) {
+    public ResponseEntity<Void> adicionarTransacao(@RequestBody Transacao transacao) {
         try {
             if (transacao == null) {
                 return ResponseEntity.badRequest().build(); // 400
             }
 
-            // Validar campos obrigatórios
+           
             if (transacao.getValor() < 0 || transacao.getDataHora() == null) {
                 return ResponseEntity.unprocessableEntity().build(); // 422
             }
 
-            // Não aceitar transações no futuro
             if (transacao.getDataHora().isAfter(OffsetDateTime.now())) {
                 return ResponseEntity.unprocessableEntity().build(); // 422
             }
 
-            // Se passar nas validações, adiciona na pilha
+           
             service.PostTransacao(transacao);
 
             return ResponseEntity.status(HttpStatus.CREATED).build(); // 201
@@ -52,12 +56,12 @@ public class TransacaoController {
         }
     }
 
+
     @DeleteMapping("transacao")
     public ResponseEntity<Void> deleteTransacao(){
         service.delete();
         return ResponseEntity.ok().build(); // 200 OK
     }
-
 
 
 

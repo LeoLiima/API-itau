@@ -15,11 +15,4 @@ public class Transacao {
         dataHora = OffsetDateTime.now();
     }
 
-    public double getValor() {
-        return this.getValor();
-    }
-
-    public OffsetDateTime getDataHora() {
-        return dataHora;
-    }
 }
